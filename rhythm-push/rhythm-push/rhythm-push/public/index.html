@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2C362A">
+<link rel="manifest" href="/manifest.json">
+<title>Rhythm — weekly check-in</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500;1,9..144,600&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg: #2C362A;
+  --bg-deep: #232B21;
+  --panel: #38442F;
+  --panel-light: #445039;
+  --line: rgba(243,239,227,0.10);
+  --accent: #E8A878;
+  --accent-dim: rgba(232,168,120,0.18);
+  --gold: #D4B483;
+  --text: #F3EFE3;
+  --text-dim: #B9C2AE;
+  --good: #93BF8A;
+  --radius: 22px;
+}
+body[data-theme="light"]{
+  --bg: #F6F2E9;
+  --bg-deep: #EDE7D8;
+  --panel: #FFFFFF;
+  --panel-light: #F3EEE1;
+  --line: rgba(43,54,38,0.12);
+  --accent: #C9793F;
+  --accent-dim: rgba(201,121,63,0.14);
+  --gold: #B98A4A;
+  --text: #2B3626;
+  --text-dim: #6E7A64;
+  --good: #5E8C56;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+html,body{margin:0; padding:0;}
+body{
+  background: radial-gradient(120% 140% at 50% -10%, #3A472F 0%, var(--bg) 45%, var(--bg-deep) 100%);
+  color: var(--text);
+  font-family: 'Work Sans', -apple-system, sans-serif;
+  min-height: 100vh;
+  display:flex;
+  justify-content:center;
+  -webkit-font-smoothing: antialiased;
+}
+#app{
+  width:100%;
+  max-width: 460px;
+  min-height: 100vh;
+  padding: env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0) 0;
+  position:relative;
+  overflow-x:hidden;
+}
+.screen{ padding: 34px 22px 100px; animation: fade .45s ease; }
+@keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+h1,h2,h3{ font-family:'Fraunces', serif; margin:0; font-weight:600; }
+p{ margin:0; }
+
+/* ---------- Onboarding ---------- */
+.brand{
+  display:flex; align-items:center; gap:10px; margin-bottom:46px;
+}
+.brand svg{ width:26px; height:26px; }
+.brand span{ font-family:'Fraunces', serif; font-style:italic; font-size:19px; letter-spacing:0.02em; color: var(--gold); }
+
+.onboard-title{ font-size: 30px; line-height:1.25; margin-bottom:10px; }
+.onboard-sub{ color:var(--text-dim); font-size:15px; line-height:1.5; margin-bottom:34px; }
+
+.choice{
+  display:block; width:100%; text-align:left;
+  background: var(--panel); border:1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom:12px; color:var(--text);
+  font-family:'Work Sans'; cursor:pointer; transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+.choice:active{ transform: scale(0.98); }
+.choice.selected{ background: var(--accent-dim); border-color: var(--accent); }
+.choice-title{ font-size:16.5px; font-weight:600; margin-bottom:3px; }
+.choice-sub{ font-size:13px; color:var(--text-dim); }
+
+.custom-input{
+  width:100%; background:var(--panel); border:1px solid var(--line); border-radius: 16px;
+  padding:14px 16px; color:var(--text); font-family:'Work Sans'; font-size:15px; margin-top:6px; margin-bottom:12px;
+  outline:none;
+}
+.custom-input:focus{ border-color: var(--accent); }
+.custom-input::placeholder{ color: var(--text-dim); }
+
+.start-btn{
+  width:100%; min-height:200px; background: linear-gradient(160deg, var(--accent) 0%, var(--gold) 100%);
+  border:none; border-radius: 32px; color:#22291F; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  box-shadow: 0 18px 40px -12px rgba(232,168,120,0.45);
+  transition: transform .15s ease;
+  margin-bottom: 20px;
+}
+.start-btn:active{ transform: scale(0.97); }
+.start-btn svg{ width:44px; height:44px; }
+.start-btn span{ font-family:'Fraunces', serif; font-size:26px; font-weight:600; letter-spacing:0.01em; }
+
+.primary-btn{
+  width:100%; background: var(--accent); color:#22291F; border:none; border-radius:16px;
+  padding:16px; font-family:'Work Sans'; font-weight:700; font-size:15.5px; letter-spacing:0.01em;
+  cursor:pointer; margin-top:20px; transition: transform .15s ease, opacity .15s ease;
+}
+.primary-btn:active{ transform: scale(0.98); }
+.primary-btn:disabled{ opacity:0.4; }
+
+.ghost-btn{
+  width:100%; background:transparent; color: var(--text-dim); border:1px solid var(--line); border-radius:16px;
+  padding:14px; font-family:'Work Sans'; font-weight:600; font-size:14px; cursor:pointer; margin-top:10px;
+}
+
+/* ---------- Today screen ---------- */
+.top-row{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 26px; }
+.eyebrow{ color: var(--gold); font-size:12.5px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px; }
+.date-title{ font-size:26px; }
+.icon-btn{
+  width:40px; height:40px; border-radius:50%; background:var(--panel); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+}
+
+/* week strip — signature element */
+.week-strip{ display:flex; justify-content:space-between; margin-bottom:30px; }
+.day-bud{ display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; }
+.bud-label{ font-size:11px; color: var(--text-dim); font-weight:600; }
+.bud-svg{ width:34px; height:34px; }
+.bud-petal{ transition: fill .3s ease, opacity .3s ease; }
+.day-bud.today .bud-label{ color: var(--accent); }
+.day-bud.today .bud-ring{ stroke: var(--accent); }
+
+.section-label{ font-size:13px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.1em; margin: 26px 0 12px; }
+
+.check-item{
+  display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--line);
+  border-radius:18px; padding:16px 16px; margin-bottom:10px; cursor:pointer; transition: background .2s ease, border-color .2s ease;
+}
+.check-item.done{ background: rgba(147,191,138,0.14); border-color: rgba(147,191,138,0.4); }
+.check-circle{
+  width:26px; height:26px; border-radius:50%; border:2px solid var(--text-dim); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; transition: all .2s ease;
+}
+.check-item.done .check-circle{ background: var(--good); border-color: var(--good); }
+.check-circle svg{ width:14px; height:14px; opacity:0; transition: opacity .15s ease; }
+.check-item.done .check-circle svg{ opacity:1; }
+.check-text{ font-size:15px; font-weight:500; }
+.check-item.done .check-text{ color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(243,239,227,0.35); }
+
+.feeling-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px 18px 16px; margin-top:8px;
+}
+.feeling-labels{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-dim); margin-top:8px; }
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background: var(--line); margin-top:14px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background: var(--accent); border:3px solid var(--bg-deep); cursor:pointer;
+}
+
+.water-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px 18px 16px; margin-bottom:10px;
+}
+.water-head{ display:flex; justify-content:space-between; align-items:baseline; }
+.water-head h3{ font-size:15px; font-weight:600; font-family:'Work Sans'; }
+.water-total{ font-family:'Fraunces', serif; font-size:22px; color: var(--accent); }
+.water-total span{ font-size:13px; color:var(--text-dim); font-family:'Work Sans'; margin-left:2px; }
+.water-track{ height:10px; border-radius:6px; background: var(--bg-deep); overflow:hidden; margin-top:12px; }
+.water-fill{ height:100%; background: linear-gradient(90deg, var(--gold), var(--accent)); border-radius:6px; transition: width .35s ease; }
+.water-goal-label{ font-size:11.5px; color:var(--text-dim); margin-top:6px; }
+.water-buttons{ display:flex; gap:8px; margin-top:14px; }
+.water-btn{
+  flex:1; background: var(--panel-light); border:1px solid var(--line); color:var(--text); border-radius:14px;
+  padding:11px 4px; font-family:'Work Sans'; font-weight:700; font-size:13.5px; cursor:pointer; transition: transform .15s ease, background .15s ease;
+}
+.water-btn:active{ transform: scale(0.95); background: var(--accent-dim); }
+.water-undo{ text-align:center; font-size:12px; color:var(--text-dim); margin-top:10px; cursor:pointer; text-decoration:underline; text-decoration-color: rgba(185,194,174,0.4); }
+
+.weight-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:16px 18px; margin-bottom:10px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.weight-card h3{ font-size:15px; font-weight:600; font-family:'Work Sans'; margin-bottom:2px; }
+.weight-card .weight-hint{ font-size:11.5px; color:var(--text-dim); }
+.weight-input-row{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.weight-input{
+  width:64px; background:var(--bg-deep); border:1px solid var(--line); border-radius:10px; color:var(--text);
+  font-family:'Work Sans'; font-size:15px; padding:8px 8px; text-align:center; outline:none;
+}
+.weight-input:focus{ border-color: var(--accent); }
+.weight-unit{
+  background:var(--panel-light); border:1px solid var(--line); border-radius:10px; color:var(--text-dim);
+  font-family:'Work Sans'; font-size:12px; font-weight:600; padding:8px 8px; cursor:pointer;
+}
+
+.counter-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:16px 18px 14px; margin-bottom:10px;
+}
+.counter-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+.counter-head h3{ font-size:14.5px; font-weight:600; font-family:'Work Sans'; }
+.counter-total{ font-family:'Fraunces', serif; font-size:19px; color: var(--accent); flex-shrink:0; }
+.counter-total span{ font-size:12px; color:var(--text-dim); font-family:'Work Sans'; margin-left:2px; }
+.counter-track{ height:8px; border-radius:5px; background: var(--bg-deep); overflow:hidden; margin-top:11px; }
+.counter-fill{ height:100%; background: linear-gradient(90deg, var(--gold), var(--accent)); border-radius:5px; transition: width .35s ease; }
+.counter-row{ display:flex; align-items:center; gap:10px; margin-top:12px; }
+.counter-step-btn{
+  width:38px; height:38px; border-radius:12px; background: var(--panel-light); border:1px solid var(--line); color:var(--text);
+  font-size:18px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.counter-step-btn:active{ transform: scale(0.92); }
+.counter-add-btn{
+  flex:1; background: var(--accent-dim); border:1px solid var(--accent); color: var(--accent); border-radius:12px;
+  padding:10px 4px; font-family:'Work Sans'; font-weight:700; font-size:13.5px; cursor:pointer;
+}
+.counter-add-btn:active{ transform: scale(0.97); }
+
+.streak-row{ display:flex; gap:10px; margin-bottom:22px; }
+.streak-pill{
+  flex:1; background: var(--panel); border:1px solid var(--line); border-radius:16px; padding:12px 14px;
+  display:flex; align-items:center; gap:10px;
+}
+.streak-pill .flame{ font-size:20px; line-height:1; }
+.streak-num{ font-family:'Fraunces', serif; font-size:20px; color: var(--accent); line-height:1; }
+.streak-cap{ font-size:11px; color:var(--text-dim); margin-top:2px; }
+
+.reminder-banner{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background: var(--accent-dim); border:1px solid var(--accent); border-radius:16px;
+  padding:12px 14px; margin-bottom:18px; font-size:13.5px; line-height:1.4;
+}
+.reminder-add{
+  background: var(--accent); color:#22291F; border:none; border-radius:10px; padding:8px 12px;
+  font-family:'Work Sans'; font-weight:700; font-size:12.5px; cursor:pointer; flex-shrink:0;
+}
+
+.reminder-block{ margin-top:6px; }
+.reminder-hint{ font-size:12.5px; color:var(--text-dim); margin-top:2px; margin-bottom:14px; }
+.interval-row{ display:flex; gap:8px; margin-top:14px; }
+.interval-btn{
+  flex:1; background: var(--panel-light); border:1px solid var(--line); color:var(--text-dim);
+  border-radius:12px; padding:10px 4px; font-family:'Work Sans'; font-weight:700; font-size:13px; cursor:pointer;
+}
+.interval-btn.active{ background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.note-line{ font-size:13px; color:var(--text-dim); margin-top:18px; line-height:1.5; text-align:center; padding:0 8px; }
+
+/* ---------- Week review ---------- */
+.month-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap:7px; margin-top:6px; }
+.month-dow{ text-align:center; font-size:10.5px; color:var(--text-dim); font-weight:600; padding-bottom:4px; }
+.month-cell{
+  aspect-ratio: 1; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600; color: var(--text-dim); background: var(--panel); border:1px solid var(--line);
+}
+.month-cell.future{ opacity:0.35; }
+.month-cell.today{ border-color: var(--accent); color: var(--text); }
+.month-cell.empty{ background:transparent; border:none; }
+.month-summary{ display:flex; gap:14px; margin: 20px 0 4px; }
+.month-stat{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px; text-align:center; }
+.month-stat-num{ font-family:'Fraunces', serif; font-size:22px; color:var(--accent); }
+.month-stat-label{ font-size:11px; color:var(--text-dim); margin-top:2px; }
+.week-bar-row{ display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.week-bar-label{ width:38px; font-size:12.5px; color:var(--text-dim); font-weight:600; }
+.week-bar-track{ flex:1; height:10px; border-radius:6px; background: var(--panel); overflow:hidden; }
+.week-bar-fill{ height:100%; background: linear-gradient(90deg, var(--gold), var(--accent)); border-radius:6px; }
+.week-bar-pct{ width:34px; text-align:right; font-size:12px; color:var(--text-dim); font-variant-numeric: tabular-nums; }
+
+/* ---------- Nav ---------- */
+.tabbar{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:460px;
+  display:flex; justify-content:space-around; padding: 12px 22px calc(16px + env(safe-area-inset-bottom,0));
+  background: linear-gradient(180deg, rgba(35,43,33,0) 0%, var(--bg-deep) 40%);
+}
+.tab{
+  display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-dim);
+  font-size:11px; font-weight:600; cursor:pointer; padding:6px 18px; border-radius:14px;
+}
+.tab.active{ color: var(--accent); }
+.tab svg{ width:20px; height:20px; }
+
+.settings-sheet{
+  position:fixed; inset:0; background: rgba(15,18,13,0.55); display:flex; align-items:flex-end; justify-content:center; z-index:20;
+}
+.sheet-inner{
+  width:100%; max-width:460px; background: var(--bg-deep); border-radius: 26px 26px 0 0; padding: 26px 22px calc(30px + env(safe-area-inset-bottom,0));
+  border-top:1px solid var(--line);
+}
+.sheet-handle{ width:38px; height:4px; background:var(--line); border-radius:2px; margin: 0 auto 20px; }
+.sheet-inner{ max-height: 85vh; overflow-y: auto; }
+.settings-section{ margin-top: 22px; padding-top:18px; border-top:1px solid var(--line); }
+.settings-section h4{ font-family:'Fraunces', serif; font-size:15.5px; font-weight:600; margin-bottom:2px; }
+.settings-section .settings-sub{ font-size:12px; color:var(--text-dim); margin-bottom:14px; }
+.goal-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 0; }
+.goal-row label{ font-size:13.5px; flex:1; }
+.goal-input{
+  width:80px; background:var(--bg-deep); border:1px solid var(--line); border-radius:10px; color:var(--text);
+  font-family:'Work Sans'; font-size:14px; padding:8px; text-align:center; outline:none; flex-shrink:0;
+}
+.goal-input:focus{ border-color: var(--accent); }
+.theme-row{ display:flex; gap:8px; margin-top:4px; }
+.danger-btn{
+  width:100%; background: rgba(200,90,70,0.12); border:1px solid rgba(200,90,70,0.4); color:#E38A75;
+  border-radius:14px; padding:13px; font-family:'Work Sans'; font-weight:600; font-size:13.5px; cursor:pointer; margin-top:10px;
+}
+.hidden{ display:none !important; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+
+const GOALS = {
+  debloat: {
+    label: "De-bloat",
+    sub: "Ease the puffiness, gently",
+    items: [
+      {id:'lowsalt', text:'Low-salt meals', unit:'meals', goal:3},
+      {id:'veg', text:'Fiber-rich servings', unit:'servings', goal:4},
+      {id:'slow', text:'Unrushed meals', unit:'meals', goal:3},
+    ],
+    feelingQ: "How does your body feel today",
+    feelingLow: "Heavy", feelingHigh: "Light",
+    showWeight: false
+  }
+};
+
+const WATER_GOAL_ML = 2000;
+const WATER_STEPS = [200, 250, 500];
+const STEPS_GOAL = 8000;
+const STEPS_QUICK = [1000, 2500, 5000];
+const REMINDER_HOURS_OPTIONS = [1, 2, 3];
+
+function waterGoal(){ return (state.goals && state.goals.water) || WATER_GOAL_ML; }
+function stepsGoal(){ return (state.goals && state.goals.steps) || STEPS_GOAL; }
+function itemGoal(it){ return (state.goals && state.goals.itemGoals && state.goals.itemGoals[it.id]) || it.goal; }
+
+const el = (html) => { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; };
+const pad = n => n.toString().padStart(2,'0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayDate = new Date();
+const todayISO = iso(todayDate);
+const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function dayPct(g, dayData){
+  const parts = [Math.min(1, (dayData.steps||0) / stepsGoal())];
+  g.items.forEach(it=>{
+    const c = (dayData.counts && dayData.counts[it.id]) || 0;
+    parts.push(Math.min(1, c / itemGoal(it)));
+  });
+  return parts.reduce((a,b)=>a+b,0) / parts.length;
+}
+
+function completedDateSet(g){
+  const set = new Set();
+  Object.keys(state.days).forEach(dISO=>{
+    if(dayPct(g, state.days[dISO]) >= 0.999) set.add(dISO);
+  });
+  return set;
+}
+
+function computeStreaks(g){
+  const completed = completedDateSet(g);
+
+  // Current streak: today counts if already complete; otherwise start checking from yesterday
+  // so an in-progress today never breaks the streak.
+  let current = 0;
+  let cursor = new Date(todayDate);
+  if(completed.has(iso(cursor))){ current++; }
+  cursor.setDate(cursor.getDate()-1);
+  while(completed.has(iso(cursor))){
+    current++;
+    cursor.setDate(cursor.getDate()-1);
+  }
+
+  // Longest streak: walk every calendar day from when tracking started through today.
+  let longest = current;
+  let run = 0;
+  const start = new Date(state.profile.startedAt || todayISO);
+  const end = new Date(todayDate);
+  for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
+    if(completed.has(iso(d))){ run++; longest = Math.max(longest, run); }
+    else { run = 0; }
+  }
+  return { current, longest };
+}
+
+function weekDates(ref){
+  const d = new Date(ref);
+  const day = (d.getDay()+6)%7; // 0=Mon
+  d.setDate(d.getDate()-day);
+  return Array.from({length:7}, (_,i)=>{ const nd=new Date(d); nd.setDate(d.getDate()+i); return nd; });
+}
+
+let state = { profile: null, days: {} };
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem('rhythm-app-state');
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ /* nothing saved yet */ }
+  if(!state.days) state.days = {};
+  if(!state.profile) state.profile = { goal:'debloat', customText:'', startedAt: todayISO };
+  if(!state.settings) state.settings = {};
+  if(!state.settings.water) state.settings.water = { on: false, hours: 2 };
+  if(!state.settings.steps) state.settings.steps = { on: false, hours: 3 };
+  if(!state.goals) state.goals = { water: WATER_GOAL_ML, steps: STEPS_GOAL, itemGoals: {} };
+  if(!state.goals.itemGoals) state.goals.itemGoals = {};
+  if(!state.theme) state.theme = 'dark';
+  if(typeof state.lastWaterAt === 'undefined') state.lastWaterAt = null;
+  if(typeof state.lastStepsAt === 'undefined') state.lastStepsAt = null;
+  if(typeof state.lastNotifiedAt === 'undefined') state.lastNotifiedAt = {};
+}
+
+async function saveState(){
+  try{ localStorage.setItem('rhythm-app-state', JSON.stringify(state)); }
+  catch(e){ console.error('local save failed', e); }
+}
+
+function getDay(dISO){
+  if(!state.days[dISO]) state.days[dISO] = {counts:{}, feeling:null, water:0, steps:0, weight:null};
+  return state.days[dISO];
+}
+async function saveDay(dISO, data){
+  state.days[dISO] = data;
+  await saveState();
+}
+
+/* ---------------- Push notifications ---------------- */
+function urlBase64ToUint8Array(base64String){
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for(let i=0; i<rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+async function pushSync(partial){
+  try{
+    const subRaw = localStorage.getItem('rhythm-push-subscription');
+    if(!subRaw) return;
+    const subscription = JSON.parse(subRaw);
+    await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription, ...partial })
+    });
+  }catch(e){ /* offline or server unreachable — the next successful sync will catch up */ }
+}
+
+async function enablePush(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)){
+    return { ok:false, msg:'Push notifications aren\u2019t supported in this browser' };
+  }
+  try{
+    const reg = await navigator.serviceWorker.register('/service-worker.js');
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted') return { ok:false, msg:'Notifications blocked' };
+    const keyRes = await fetch('/api/vapid-public-key').then(r=>r.json());
+    if(!keyRes.key) return { ok:false, msg:'Server has no VAPID key set up yet' };
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub){
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(keyRes.key)
+      });
+    }
+    localStorage.setItem('rhythm-push-subscription', JSON.stringify(sub));
+    await pushSync({ water: state.settings.water, steps: state.settings.steps });
+    return { ok:true };
+  }catch(e){
+    return { ok:false, msg: 'Could not enable push: ' + e.message };
+  }
+}
+
+function leafIcon(color){
+  return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4c8 0 16 4 16 16C12 20 4 12 4 4Z" fill="${color}"/></svg>`;
+}
+function checkSvg(){
+  return `<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.2 11.5L13 4.5" stroke="#22291F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function budSvg(pct, isToday){
+  // pct 0..1 fill of a flower-bud circle
+  const dimRing = state.theme === 'light' ? 'rgba(43,54,38,0.16)' : 'rgba(243,239,227,0.18)';
+  const ringColor = isToday ? '#E8A878' : dimRing;
+  const fillColor = pct >= 1 ? '#93BF8A' : pct > 0 ? '#D4B483' : 'transparent';
+  const r = 15, c = 17;
+  const circumference = 2*Math.PI*r;
+  const dash = circumference * Math.min(pct,1);
+  return `<svg class="bud-svg" viewBox="0 0 34 34">
+    <circle class="bud-ring" cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${ringColor}" stroke-width="2"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${fillColor}" stroke-width="3"
+      stroke-linecap="round" stroke-dasharray="${dash} ${circumference}"
+      transform="rotate(-90 ${c} ${c})"/>
+    ${pct>0 ? `<circle cx="${c}" cy="${c}" r="4" fill="${fillColor}" opacity="0.9"/>` : ''}
+  </svg>`;
+}
+
+const app = document.getElementById('app');
+let currentTab = 'today';
+let profile = null;
+let todayRefs = null;
+
+function checkReminders(){
+  const types = [
+    { key:'water', lastAt: state.lastWaterAt, label: 'Water check-in', body: "It's been a while since your last water — take a sip 💧" },
+    { key:'steps', lastAt: state.lastStepsAt, label: 'Movement check-in', body: "Haven't logged steps in a while — time for a short walk? 🚶" },
+  ];
+  types.forEach(t=>{
+    const cfg = state.settings[t.key];
+    if(!cfg || !cfg.on) return;
+    const hoursSince = t.lastAt ? (Date.now()-t.lastAt)/3600000 : (cfg.hours + 1);
+    if(hoursSince < cfg.hours) return;
+    if(typeof Notification !== 'undefined' && Notification.permission === 'granted'){
+      const lastNotified = (state.lastNotifiedAt && state.lastNotifiedAt[t.key]) || 0;
+      if(Date.now() - lastNotified > cfg.hours * 3600000 * 0.9){
+        try{ new Notification(t.label, { body: t.body }); }
+        catch(e){ /* notifications unsupported in this context */ }
+        state.lastNotifiedAt[t.key] = Date.now();
+        saveState();
+      }
+    }
+  });
+  if(todayRefs) todayRefs.refreshReminder();
+}
+
+async function init(){
+  // Show something immediately so the screen is never blank while storage loads.
+  app.innerHTML = `<div class="screen" style="display:flex; align-items:center; justify-content:center; min-height:100vh;">
+    ${leafIcon('#D4B483')}
+  </div>`;
+  await loadState();
+  profile = state.profile;
+  document.body.setAttribute('data-theme', state.theme);
+  renderStart();
+  checkReminders();
+  setInterval(checkReminders, 5 * 60 * 1000);
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/service-worker.js').catch(()=>{ /* fine if this fails on a non-hosted/local run */ });
+  }
+}
+
+function renderStart(){
+  const screen = el(`<div class="screen" style="min-height:100vh; display:flex; flex-direction:column; padding-top:60px;">
+    <div class="brand" style="margin-bottom:auto;">${leafIcon('#D4B483')}<span>Rhythm</span></div>
+    <div style="margin-bottom:60px;">
+      <div class="onboard-title" style="font-size:32px;">Ready to<br>feel lighter?</div>
+      <div class="onboard-sub">One tap to open today's water, steps, and de-bloat check-ins.</div>
+    </div>
+    <button class="start-btn" id="startBtn">
+      ${leafIcon('#22291F')}
+      <span>De-bloat</span>
+    </button>
+  </div>`);
+  screen.querySelector('#startBtn').addEventListener('click', renderShell);
+  app.innerHTML=''; app.appendChild(screen);
+}
+
+/* ---------------- Shell / Nav ---------------- */
+function renderShell(){
+  app.innerHTML = '';
+  const container = el(`<div></div>`);
+  app.appendChild(container);
+  renderTab(container);
+}
+
+async function renderTab(container){
+  container.innerHTML = '';
+  if(currentTab === 'today') await renderToday(container);
+  else if(currentTab === 'week') await renderWeek(container);
+  else await renderMonth(container);
+  renderTabbar(container);
+}
+
+function renderTabbar(container){
+  const bar = el(`<div class="tabbar">
+    <div class="tab ${currentTab==='today'?'active':''}" data-tab="today">
+      ${leafIcon(currentTab==='today' ? '#E8A878' : '#B9C2AE')}
+      <span>Today</span>
+    </div>
+    <div class="tab ${currentTab==='week'?'active':''}" data-tab="week">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="${currentTab==='week'?'#E8A878':'#B9C2AE'}" stroke-width="1.8"/><path d="M3 9.5H21" stroke="${currentTab==='week'?'#E8A878':'#B9C2AE'}" stroke-width="1.8"/></svg>
+      <span>Week</span>
+    </div>
+    <div class="tab ${currentTab==='month'?'active':''}" data-tab="month">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="3" stroke="${currentTab==='month'?'#E8A878':'#B9C2AE'}" stroke-width="1.8"/><path d="M3 9H21" stroke="${currentTab==='month'?'#E8A878':'#B9C2AE'}" stroke-width="1.8"/><path d="M7 2.5V6M17 2.5V6" stroke="${currentTab==='month'?'#E8A878':'#B9C2AE'}" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Month</span>
+    </div>
+  </div>`);
+  bar.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click', ()=>{ currentTab = t.dataset.tab; renderTab(container); });
+  });
+  container.appendChild(bar);
+}
+
+/* ---------------- Today ---------------- */
+async function renderToday(container){
+  const g = GOALS[profile.goal];
+  const day = await getDay(todayISO);
+  const dates = weekDates(todayDate);
+
+  const screen = el(`<div class="screen">
+    <div class="top-row">
+      <div>
+        <div class="eyebrow">${g.label}${profile.goal==='other' && profile.customText ? ' · ' + profile.customText : ''}</div>
+        <div class="date-title">${todayDate.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'})}</div>
+      </div>
+      <div class="icon-btn" id="settingsBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7Z" stroke="#F3EFE3" stroke-width="1.6"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V20a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87A1.7 1.7 0 0 0 3.13 12.5H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.56-1.04 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.04-1.56V.6" stroke="#F3EFE3" stroke-width="1.2" opacity="0"/></svg>
+      </div>
+    </div>
+
+    <div class="week-strip" id="weekStrip"></div>
+
+    <div class="streak-row" id="streakRow"></div>
+
+    <div id="reminderSlot"></div>
+
+    <div class="section-label">Water</div>
+    <div class="water-card">
+      <div class="water-head">
+        <h3>Today's intake</h3>
+        <div class="water-total" id="waterTotal">${day.water || 0}<span>/${waterGoal()}ml</span></div>
+      </div>
+      <div class="water-track"><div class="water-fill" id="waterFill" style="width:${Math.min(100, Math.round(((day.water||0)/waterGoal())*100))}%"></div></div>
+      <div class="water-goal-label">Goal ${waterGoal()}ml</div>
+      <div class="water-buttons" id="waterButtons">
+        ${WATER_STEPS.map(ml=>`<button class="water-btn" data-ml="${ml}">+${ml}ml</button>`).join('')}
+      </div>
+      <div class="water-undo" id="waterUndo">Reset today's water</div>
+    </div>
+
+    <div class="section-label">Steps</div>
+    <div class="counter-card">
+      <div class="counter-head">
+        <h3>Movement today</h3>
+        <div class="counter-total" id="stepsTotal">${(day.steps||0).toLocaleString()}<span>/${stepsGoal().toLocaleString()}</span></div>
+      </div>
+      <div class="counter-track"><div class="counter-fill" id="stepsFill" style="width:${Math.min(100, Math.round(((day.steps||0)/stepsGoal())*100))}%"></div></div>
+      <div class="water-buttons" style="margin-top:14px;" id="stepsButtons">
+        ${STEPS_QUICK.map(s=>`<button class="water-btn" data-steps="${s}">+${s.toLocaleString()}</button>`).join('')}
+      </div>
+      <div class="water-undo" id="stepsUndo">Reset today's steps</div>
+    </div>
+
+    ${g.showWeight ? `
+    <div class="weight-card">
+      <div>
+        <h3>Weight <span style="color:var(--text-dim); font-weight:500;">(optional)</span></h3>
+        <div class="weight-hint">Skip this if it's not useful for you</div>
+      </div>
+      <div class="weight-input-row">
+        <input type="number" inputmode="decimal" class="weight-input" id="weightInput" placeholder="—" value="${day.weight ? day.weight.value : ''}">
+        <div class="weight-unit" id="weightUnit">${(day.weight && day.weight.unit) || 'kg'}</div>
+      </div>
+    </div>` : ''}
+
+    <div class="section-label">Today's counters</div>
+    <div id="counters"></div>
+
+    <div class="feeling-card">
+      <h3 style="font-size:15px; font-weight:600;">${g.feelingQ}</h3>
+      <input type="range" min="1" max="5" step="1" id="feelingRange" value="${day.feeling || 3}">
+      <div class="feeling-labels"><span>${g.feelingLow}</span><span>${g.feelingHigh}</span></div>
+    </div>
+
+    <div class="note-line">Small, repeatable habits add up more than any single day. No pressure — just show up where you can.</div>
+  </div>`);
+
+  // week strip
+  const stripWrap = screen.querySelector('#weekStrip');
+  for(const d of dates){
+    const dISO = iso(d);
+    const dayData = await getDay(dISO);
+    const pct = dayPct(g, dayData);
+    const isToday = dISO === todayISO;
+    const bud = el(`<div class="day-bud ${isToday?'today':''}" data-date="${dISO}">
+      <div class="bud-label">${DOW[(d.getDay()+6)%7]}</div>
+      ${budSvg(pct, isToday)}
+    </div>`);
+    bud.addEventListener('click', ()=>{ /* future: jump to that day's detail */ });
+    stripWrap.appendChild(bud);
+  }
+
+  function refreshBud(){
+    const bud = stripWrap.querySelector(`[data-date="${todayISO}"]`);
+    if(bud) bud.innerHTML = `<div class="bud-label">${DOW[(todayDate.getDay()+6)%7]}</div>${budSvg(dayPct(g, day), true)}`;
+    refreshStreak();
+  }
+
+  const streakWrap = screen.querySelector('#streakRow');
+  function refreshStreak(){
+    const { current, longest } = computeStreaks(g);
+    streakWrap.innerHTML = `
+      <div class="streak-pill"><span class="flame">🔥</span><div><div class="streak-num">${current}</div><div class="streak-cap">day streak</div></div></div>
+      <div class="streak-pill"><span class="flame">🏆</span><div><div class="streak-num">${longest}</div><div class="streak-cap">best streak</div></div></div>
+    `;
+  }
+  refreshStreak();
+
+  // counters
+  const countersWrap = screen.querySelector('#counters');
+  if(!day.counts) day.counts = {};
+  g.items.forEach(it=>{
+    const goal = itemGoal(it);
+    const count = day.counts[it.id] || 0;
+    const pct = Math.min(100, Math.round((count/goal)*100));
+    const card = el(`<div class="counter-card" data-id="${it.id}">
+      <div class="counter-head">
+        <h3>${it.text}</h3>
+        <div class="counter-total" data-total>${count}<span>/${goal} ${it.unit}</span></div>
+      </div>
+      <div class="counter-track"><div class="counter-fill" data-fill style="width:${pct}%"></div></div>
+      <div class="counter-row">
+        <div class="counter-step-btn" data-minus>−</div>
+        <div class="counter-add-btn" data-plus>+1 ${it.unit.replace(/s$/,'')}</div>
+      </div>
+    </div>`);
+    const update = async (delta)=>{
+      const cur = day.counts[it.id] || 0;
+      day.counts[it.id] = Math.max(0, cur + delta);
+      const c = day.counts[it.id];
+      const g2 = itemGoal(it);
+      card.querySelector('[data-total]').innerHTML = `${c}<span>/${g2} ${it.unit}</span>`;
+      card.querySelector('[data-fill]').style.width = Math.min(100, Math.round((c/g2)*100)) + '%';
+      await saveDay(todayISO, day);
+      refreshBud();
+    };
+    card.querySelector('[data-plus]').addEventListener('click', ()=>update(1));
+    card.querySelector('[data-minus]').addEventListener('click', ()=>update(-1));
+    countersWrap.appendChild(card);
+  });
+
+  screen.querySelector('#feelingRange').addEventListener('change', async (e)=>{
+    day.feeling = parseInt(e.target.value,10);
+    await saveDay(todayISO, day);
+  });
+
+  function refreshWater(){
+    const total = day.water || 0;
+    screen.querySelector('#waterTotal').innerHTML = `${total}<span>/${waterGoal()}ml</span>`;
+    screen.querySelector('#waterFill').style.width = Math.min(100, Math.round((total/waterGoal())*100)) + '%';
+  }
+  async function addWater(ml){
+    day.water = (day.water || 0) + ml;
+    state.lastWaterAt = Date.now();
+    refreshWater();
+    await saveDay(todayISO, day);
+    refreshReminder();
+    pushSync({ water: { on: state.settings.water.on, hours: state.settings.water.hours, lastAt: state.lastWaterAt } });
+  }
+  screen.querySelectorAll('.water-btn[data-ml]').forEach(btn=>{
+    btn.addEventListener('click', ()=> addWater(parseInt(btn.dataset.ml, 10)));
+  });
+  screen.querySelector('#waterUndo').addEventListener('click', async ()=>{
+    day.water = 0;
+    refreshWater();
+    await saveDay(todayISO, day);
+  });
+
+  function refreshSteps(){
+    const total = day.steps || 0;
+    screen.querySelector('#stepsTotal').innerHTML = `${total.toLocaleString()}<span>/${stepsGoal().toLocaleString()}</span>`;
+    screen.querySelector('#stepsFill').style.width = Math.min(100, Math.round((total/stepsGoal())*100)) + '%';
+  }
+  async function addSteps(n){
+    day.steps = (day.steps || 0) + n;
+    state.lastStepsAt = Date.now();
+    refreshSteps();
+    await saveDay(todayISO, day);
+    refreshBud();
+    refreshReminder();
+    pushSync({ steps: { on: state.settings.steps.on, hours: state.settings.steps.hours, lastAt: state.lastStepsAt } });
+  }
+  screen.querySelectorAll('.water-btn[data-steps]').forEach(btn=>{
+    btn.addEventListener('click', ()=> addSteps(parseInt(btn.dataset.steps, 10)));
+  });
+  screen.querySelector('#stepsUndo').addEventListener('click', async ()=>{
+    day.steps = 0;
+    refreshSteps();
+    await saveDay(todayISO, day);
+    refreshBud();
+  });
+
+  const reminderSlot = screen.querySelector('#reminderSlot');
+  function refreshReminder(){
+    const banners = [];
+    const water = state.settings.water;
+    if(water && water.on){
+      const hoursSince = state.lastWaterAt ? (Date.now()-state.lastWaterAt)/3600000 : 999;
+      if(hoursSince >= water.hours){
+        banners.push(`<div class="reminder-banner">
+          <span>💧 It's been a while since your last water — top up?</span>
+          <button class="reminder-add" data-reminder="water">+250ml</button>
+        </div>`);
+      }
+    }
+    const steps = state.settings.steps;
+    if(steps && steps.on){
+      const hoursSince = state.lastStepsAt ? (Date.now()-state.lastStepsAt)/3600000 : 999;
+      if(hoursSince >= steps.hours){
+        banners.push(`<div class="reminder-banner">
+          <span>🚶 Haven't logged steps in a while — short walk?</span>
+          <button class="reminder-add" data-reminder="steps">+1,000</button>
+        </div>`);
+      }
+    }
+    reminderSlot.innerHTML = banners.join('');
+    const waterBtn = reminderSlot.querySelector('[data-reminder="water"]');
+    if(waterBtn) waterBtn.addEventListener('click', ()=> addWater(250));
+    const stepsBtn = reminderSlot.querySelector('[data-reminder="steps"]');
+    if(stepsBtn) stepsBtn.addEventListener('click', ()=> addSteps(1000));
+  }
+  refreshReminder();
+  todayRefs = { refreshReminder };
+
+  const weightUnitBtn = screen.querySelector('#weightUnit');
+  const weightInput = screen.querySelector('#weightInput');
+  if(weightInput){
+    const saveWeight = async ()=>{
+      const val = parseFloat(weightInput.value);
+      day.weight = isNaN(val) ? null : { value: val, unit: weightUnitBtn.textContent };
+      await saveDay(todayISO, day);
+    };
+    weightInput.addEventListener('change', saveWeight);
+    weightUnitBtn.addEventListener('click', async ()=>{
+      weightUnitBtn.textContent = weightUnitBtn.textContent === 'kg' ? 'lb' : 'kg';
+      await saveWeight();
+    });
+  }
+
+  screen.querySelector('#settingsBtn').addEventListener('click', ()=> renderSettingsSheet(()=> renderTab(container)));
+
+  container.appendChild(screen);
+}
+
+/* ---------------- Week review ---------------- */
+async function renderWeek(container){
+  todayRefs = null;
+  const g = GOALS[profile.goal];
+  const dates = weekDates(todayDate);
+
+  const { current, longest } = computeStreaks(g);
+  const screen = el(`<div class="screen">
+    <div class="eyebrow">This week</div>
+    <div class="date-title" style="margin-bottom:20px;">Your rhythm</div>
+    <div class="streak-row" style="margin-bottom:22px;">
+      <div class="streak-pill"><span class="flame">🔥</span><div><div class="streak-num">${current}</div><div class="streak-cap">day streak</div></div></div>
+      <div class="streak-pill"><span class="flame">🏆</span><div><div class="streak-num">${longest}</div><div class="streak-cap">best streak</div></div></div>
+    </div>
+    <div id="bars"></div>
+    <div class="note-line" style="margin-top:26px;">Consistency over a week matters more than any single day being perfect.</div>
+  </div>`);
+
+  const bars = screen.querySelector('#bars');
+  for(const d of dates){
+    const dISO = iso(d);
+    const dayData = await getDay(dISO);
+    const pct = Math.round(dayPct(g, dayData)*100);
+    const row = el(`<div class="week-bar-row">
+      <div class="week-bar-label">${DOW[(d.getDay()+6)%7]}</div>
+      <div class="week-bar-track"><div class="week-bar-fill" style="width:${pct}%"></div></div>
+      <div class="week-bar-pct">${pct}%</div>
+    </div>`);
+    bars.appendChild(row);
+  }
+
+  container.appendChild(screen);
+}
+
+/* ---------------- Month review ---------------- */
+async function renderMonth(container){
+  todayRefs = null;
+  const g = GOALS[profile.goal];
+  const year = todayDate.getFullYear();
+  const month = todayDate.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const leadBlanks = (firstOfMonth.getDay()+6)%7; // Monday-start offset
+
+  const { longest } = computeStreaks(g);
+  let completeDays = 0;
+  let activeDays = 0;
+
+  const cells = [];
+  for(let i=0; i<leadBlanks; i++){ cells.push(`<div class="month-cell empty"></div>`); }
+  for(let day=1; day<=daysInMonth; day++){
+    const d = new Date(year, month, day);
+    const dISO = iso(d);
+    const isFuture = d > todayDate;
+    const isToday = dISO === todayISO;
+    let bg = 'var(--panel)';
+    if(!isFuture){
+      const dayData = state.days[dISO];
+      if(dayData){
+        const pct = dayPct(g, dayData);
+        if(pct > 0) activeDays++;
+        if(pct >= 0.999){ completeDays++; bg = 'var(--good)'; }
+        else if(pct > 0){ bg = 'var(--gold)'; }
+      }
+    }
+    cells.push(`<div class="month-cell ${isFuture?'future':''} ${isToday?'today':''}" style="background:${bg};">${day}</div>`);
+  }
+
+  const screen = el(`<div class="screen">
+    <div class="eyebrow">This month</div>
+    <div class="date-title" style="margin-bottom:16px;">${todayDate.toLocaleDateString(undefined,{month:'long', year:'numeric'})}</div>
+    <div class="month-grid">
+      ${['M','T','W','T','F','S','S'].map(d=>`<div class="month-dow">${d}</div>`).join('')}
+      ${cells.join('')}
+    </div>
+    <div class="month-summary">
+      <div class="month-stat"><div class="month-stat-num">${completeDays}</div><div class="month-stat-label">complete days</div></div>
+      <div class="month-stat"><div class="month-stat-num">${activeDays}</div><div class="month-stat-label">active days</div></div>
+      <div class="month-stat"><div class="month-stat-num">${longest}</div><div class="month-stat-label">best streak</div></div>
+    </div>
+    <div class="note-line" style="margin-top:22px;">Gold means you showed up, green means you hit every goal that day.</div>
+  </div>`);
+
+  container.appendChild(screen);
+}
+
+/* ---------------- Settings sheet ---------------- */
+function reminderBlockHtml(key, title, icon){
+  const cfg = state.settings[key];
+  return `<div class="reminder-block" data-type="${key}">
+    <button class="choice ${cfg.on?'selected':''}" data-toggle>
+      <div class="choice-title">${icon} ${title}</div>
+      <div class="choice-sub" data-sub>${cfg.on ? 'On — nudges you in-app' : 'Off'}</div>
+    </button>
+    <div class="reminder-hint" data-hint style="${cfg.on?'':'display:none;'}">Remind me every</div>
+    <div class="interval-row" data-intervals style="${cfg.on?'flex':'none'}">
+      ${REMINDER_HOURS_OPTIONS.map(h=>`<button class="interval-btn ${cfg.hours===h?'active':''}" data-hours="${h}">${h} hr</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function wireReminderBlock(sheet, key){
+  const block = sheet.querySelector(`.reminder-block[data-type="${key}"]`);
+  const toggleBtn = block.querySelector('[data-toggle]');
+  const intervals = block.querySelector('[data-intervals]');
+  const hint = block.querySelector('[data-hint]');
+  const lastAtKey = key === 'water' ? 'lastWaterAt' : 'lastStepsAt';
+  toggleBtn.addEventListener('click', async ()=>{
+    const cfg = state.settings[key];
+    cfg.on = !cfg.on;
+    toggleBtn.classList.toggle('selected', cfg.on);
+    toggleBtn.querySelector('[data-sub]').textContent = cfg.on ? 'On — nudges you in-app' : 'Off';
+    intervals.style.display = cfg.on ? 'flex' : 'none';
+    hint.style.display = cfg.on ? 'block' : 'none';
+    await saveState();
+    checkReminders();
+    pushSync({ [key]: { on: cfg.on, hours: cfg.hours, lastAt: state[lastAtKey] } });
+  });
+  intervals.querySelectorAll('.interval-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      state.settings[key].hours = parseInt(btn.dataset.hours, 10);
+      intervals.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      await saveState();
+      checkReminders();
+      pushSync({ [key]: { on: state.settings[key].on, hours: state.settings[key].hours, lastAt: state[lastAtKey] } });
+    });
+  });
+}
+
+function renderSettingsSheet(onClose){
+  const g = GOALS[profile.goal];
+  const anyReminderOn = state.settings.water.on || state.settings.steps.on;
+
+  const sheet = el(`<div class="settings-sheet" id="sheet">
+    <div class="sheet-inner">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size:18px; margin-bottom:4px;">Current focus</h3>
+      <p style="color:var(--text-dim); font-size:14px;">${g.label}</p>
+
+      <div class="settings-section">
+        <h4>Reminders</h4>
+        <div class="settings-sub">Works in-app always. Tap "Enable notifications" below for real push alerts, even with the app closed.</div>
+        ${reminderBlockHtml('water', 'Water reminders', '💧')}
+        <div style="height:12px;"></div>
+        ${reminderBlockHtml('steps', 'Movement reminders', '🚶')}
+        <button class="ghost-btn" id="enableNotifs" style="${anyReminderOn?'':'display:none;'} margin-top:14px;">
+          ${typeof Notification!=='undefined' && Notification.permission==='granted' ? 'Notifications enabled ✓' : 'Enable notifications'}
+        </button>
+      </div>
+
+      <div class="settings-section">
+        <h4>Goals</h4>
+        <div class="settings-sub">Adjust targets to fit what actually works for you.</div>
+        <div class="goal-row"><label>Water (ml)</label><input type="number" class="goal-input" id="goalWater" value="${waterGoal()}"></div>
+        <div class="goal-row"><label>Steps</label><input type="number" class="goal-input" id="goalSteps" value="${stepsGoal()}"></div>
+        ${g.items.map(it=>`<div class="goal-row"><label>${it.text}</label><input type="number" class="goal-input" data-item-goal="${it.id}" value="${itemGoal(it)}"></div>`).join('')}
+      </div>
+
+      <div class="settings-section">
+        <h4>Appearance</h4>
+        <div class="theme-row">
+          <button class="interval-btn ${state.theme==='dark'?'active':''}" id="themeDark">Dark</button>
+          <button class="interval-btn ${state.theme==='light'?'active':''}" id="themeLight">Light</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>Data</h4>
+        <div class="settings-sub">Resets can't be undone.</div>
+        <button class="danger-btn" id="resetToday">Reset today's entries</button>
+        <button class="danger-btn" id="resetAll">Reset all data</button>
+      </div>
+
+      <button class="ghost-btn" id="closeSheet" style="margin-top:20px;">Close</button>
+    </div>
+  </div>`);
+
+  wireReminderBlock(sheet, 'water');
+  wireReminderBlock(sheet, 'steps');
+
+  sheet.querySelector('#enableNotifs').addEventListener('click', async (e)=>{
+    if(typeof Notification === 'undefined'){
+      e.target.textContent = 'Notifications not supported here';
+      return;
+    }
+    e.target.textContent = 'Enabling…';
+    const result = await enablePush();
+    e.target.textContent = result.ok ? 'Notifications enabled ✓' : result.msg;
+  });
+
+  const saveGoals = async ()=>{
+    const w = parseInt(sheet.querySelector('#goalWater').value, 10);
+    const s = parseInt(sheet.querySelector('#goalSteps').value, 10);
+    state.goals.water = (w > 0) ? w : WATER_GOAL_ML;
+    state.goals.steps = (s > 0) ? s : STEPS_GOAL;
+    sheet.querySelectorAll('[data-item-goal]').forEach(input=>{
+      const v = parseInt(input.value, 10);
+      const id = input.dataset.itemGoal;
+      if(v > 0) state.goals.itemGoals[id] = v;
+    });
+    await saveState();
+  };
+  sheet.querySelectorAll('#goalWater, #goalSteps, [data-item-goal]').forEach(input=>{
+    input.addEventListener('change', saveGoals);
+  });
+
+  sheet.querySelector('#themeDark').addEventListener('click', async ()=>{
+    state.theme = 'dark';
+    document.body.setAttribute('data-theme', 'dark');
+    sheet.querySelector('#themeDark').classList.add('active');
+    sheet.querySelector('#themeLight').classList.remove('active');
+    await saveState();
+  });
+  sheet.querySelector('#themeLight').addEventListener('click', async ()=>{
+    state.theme = 'light';
+    document.body.setAttribute('data-theme', 'light');
+    sheet.querySelector('#themeLight').classList.add('active');
+    sheet.querySelector('#themeDark').classList.remove('active');
+    await saveState();
+  });
+
+  function armConfirm(btn, label, action){
+    let armed = false;
+    let timer = null;
+    const original = btn.textContent;
+    btn.addEventListener('click', async ()=>{
+      if(!armed){
+        armed = true;
+        btn.textContent = 'Tap again to confirm';
+        timer = setTimeout(()=>{ armed = false; btn.textContent = original; }, 3000);
+        return;
+      }
+      clearTimeout(timer);
+      armed = false;
+      btn.textContent = original;
+      await action();
+    });
+  }
+
+  armConfirm(sheet.querySelector('#resetToday'), 'Reset today', async ()=>{
+    delete state.days[todayISO];
+    await saveState();
+    sheet.remove();
+    if(onClose) onClose();
+  });
+  armConfirm(sheet.querySelector('#resetAll'), 'Reset all', async ()=>{
+    state.days = {};
+    state.lastWaterAt = null;
+    state.lastStepsAt = null;
+    await saveState();
+    sheet.remove();
+    if(onClose) onClose();
+  });
+
+  sheet.addEventListener('click', (e)=>{ if(e.target.id==='sheet') sheet.remove(); });
+  sheet.querySelector('#closeSheet').addEventListener('click', ()=>{ sheet.remove(); if(onClose) onClose(); });
+  document.body.appendChild(sheet);
+}
+
+init();
+})();
+</script>
+</body>
+</html>
